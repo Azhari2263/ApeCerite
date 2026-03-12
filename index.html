@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPS Singkawang Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .tab-active {
+            color: #2563eb;
+        }
+
+        .tab-active i {
+            transform: translateY(-4px);
+            transition: all 0.3s;
+        }
+
+        .filter-btn-active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen pb-28">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 p-4 shadow-sm">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-800 leading-none">Admin<span class="text-blue-600">BPS</span>
+                    </h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Singkawang</p>
+                </div>
+            </div>
+            <button onclick="refreshData()"
+                class="w-9 h-9 bg-slate-100 rounded-full text-slate-500 hover:rotate-180 transition-all duration-500">
+                <i class="fas fa-sync-alt text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4">
+
+        <div id="tab-home" class="tab-content space-y-4">
+            <h2 class="text-xl font-extrabold text-slate-800 mb-2">Statistik Pengaduan</h2>
+            <div
+                class="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-[2.5rem] text-white shadow-xl shadow-blue-100 relative overflow-hidden">
+                <i class="fas fa-paper-plane absolute -right-6 -bottom-6 text-9xl opacity-10"></i>
+                <p class="text-blue-100 text-xs font-bold uppercase tracking-widest mb-1">Total Laporan</p>
+                <h3 id="stat-total" class="text-5xl font-black italic">--</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <div
+                        class="w-8 h-8 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center mb-3 text-xs font-bold uppercase tracking-widest">
+                        <i class="fas fa-eye-slash"></i>
+                    </div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase">Belum Baca</p>
+                    <h4 id="stat-unread" class="text-2xl font-black text-slate-800">--</h4>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <div
+                        class="w-8 h-8 bg-emerald-50 text-emerald-500 rounded-lg flex items-center justify-center mb-3 text-xs font-bold uppercase tracking-widest">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase">Terjawab</p>
+                    <h4 id="stat-replied" class="text-2xl font-black text-slate-800">--</h4>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-list" class="tab-content hidden space-y-4">
+            <div class="flex flex-col gap-4">
+                <h2 class="text-xl font-extrabold text-slate-800">Inbox Laporan</h2>
+
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="search-input" oninput="filterData()" placeholder="Cari nama atau jenis..."
+                        class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm">
+                </div>
+
+                <div class="flex gap-2 overflow-x-auto pb-2">
+                    <button onclick="setFilter('Semua')"
+                        class="filter-btn filter-btn-active whitespace-nowrap px-4 py-2 rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest transition-all">Semua</button>
+                    <button onclick="setFilter('Baru')"
+                        class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest transition-all">Belum
+                        Terbaca</button>
+                    <button onclick="setFilter('Dibaca')"
+                        class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest transition-all">Sedang
+                        Dibaca</button>
+                    <button onclick="setFilter('Dijawab')"
+                        class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest transition-all">Sudah
+                        Dijawab</button>
+                </div>
+            </div>
+
+            <div id="list-container" class="space-y-3">
+                <div class="text-center py-20 text-slate-400 italic">Memuat data...</div>
+            </div>
+        </div>
+
+        <div id="tab-guide" class="tab-content hidden space-y-4">
+            <h2 class="text-xl font-extrabold text-slate-800 mb-4">Panduan Penggunaan</h2>
+
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-200 space-y-6 shadow-sm">
+                <div class="flex gap-4">
+                    <div
+                        class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-100">
+                        <i class="fas fa-envelope-open-text"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm mb-1">Manajemen Laporan</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Gunakan fitur <b>Sortir Otomatis</b> untuk
+                            melihat laporan terlama yang belum dibalas. Klik pada kartu laporan untuk membaca detail
+                            pesan.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div
+                        class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-amber-100">
+                        <i class="fas fa-reply"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm mb-1">Membalas Pengaduan</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">Tulis jawaban pada kolom balasan. Setelah klik
+                            <b>Kirim Balasan</b>, sistem akan mengirim email resmi secara otomatis ke pengadu dan
+                            mengubah status menjadi <b>Dijawab</b>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 bg-slate-800 text-white rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm mb-1">Arti Status</h4>
+                        <div class="grid grid-cols-1 gap-2 mt-2">
+                            <span class="text-[10px] flex items-center gap-2 font-bold"><i
+                                    class="fas fa-circle text-rose-500"></i> BARU: Belum dibuka admin.</span>
+                            <span class="text-[10px] flex items-center gap-2 font-bold"><i
+                                    class="fas fa-circle text-amber-500"></i> DIBACA: Sedang ditinjau.</span>
+                            <span class="text-[10px] flex items-center gap-2 font-bold"><i
+                                    class="fas fa-circle text-emerald-500"></i> DIJAWAB: Selesai ditindaklanjuti.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav
+        class="fixed bottom-6 left-6 right-6 h-20 bg-white/90 backdrop-blur-xl rounded-[2rem] border border-white shadow-2xl flex justify-around items-center px-4 z-50">
+        <button onclick="showTab('home', this)"
+            class="nav-btn tab-active flex flex-col items-center gap-1 transition-all">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[9px] font-extrabold uppercase tracking-widest">Beranda</span>
+        </button>
+        <button onclick="showTab('list', this)"
+            class="nav-btn text-slate-400 flex flex-col items-center gap-1 transition-all">
+            <i class="fas fa-inbox text-lg"></i>
+            <span class="text-[9px] font-extrabold uppercase tracking-widest">Laporan</span>
+        </button>
+        <button onclick="showTab('guide', this)"
+            class="nav-btn text-slate-400 flex flex-col items-center gap-1 transition-all">
+            <i class="fas fa-book-reader text-lg"></i>
+            <span class="text-[9px] font-extrabold uppercase tracking-widest">Panduan</span>
+        </button>
+    </nav>
+
+    <div id="modal"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-md rounded-t-[3rem] sm:rounded-[3rem] p-8 shadow-2xl transition-all duration-300 transform translate-y-full"
+            id="modal-box">
+            <div id="modal-content"></div>
+            <textarea id="reply-box"
+                class="w-full mt-6 bg-slate-50 border border-slate-200 rounded-3xl p-5 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-40 transition-all"
+                placeholder="Tulis balasan resmi admin..."></textarea>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeModal()"
+                    class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-500 active:scale-95 transition-all uppercase text-[10px] tracking-widest">Batal</button>
+                <button id="btn-kirim"
+                    class="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all uppercase text-[10px] tracking-widest">Kirim
+                    Balasan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const URL_API = "https://script.google.com/macros/s/AKfycbzGjZJ1MeGaWnV65caG17SVdO3kf_eeos45vjlJobM72RMnrADTleNADEVMG4csVpZD-A/exec";
+        let rawData = [];
+        let currentFilter = 'Semua';
+
+        function showTab(id, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById('tab-' + id).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-blue-600', 'text-slate-400'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('tab-active'));
+            btn.classList.replace('text-slate-400', 'text-blue-600');
+            btn.classList.add('tab-active');
+            if (id === 'home') fetchStats();
+            if (id === 'list') fetchList();
+        }
+
+        async function fetchStats() {
+            try {
+                const r = await fetch(`${URL_API}?action=getStats`);
+                const d = await r.json();
+                document.getElementById('stat-total').innerText = d.total;
+                document.getElementById('stat-unread').innerText = d.unread;
+                document.getElementById('stat-replied').innerText = d.replied;
+            } catch (e) { console.error("Koneksi gagal"); }
+        }
+
+        async function fetchList() {
+            const container = document.getElementById('list-container');
+            container.innerHTML = `<div class="text-center py-20 text-slate-300 italic animate-pulse">Menghubungkan...</div>`;
+            try {
+                const r = await fetch(`${URL_API}?action=getData`);
+                rawData = await r.json();
+                filterData();
+            } catch (e) { container.innerHTML = "Gagal memuat data."; }
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('filter-btn-active');
+                if (btn.innerText.includes(filter) || (filter === 'Semua' && btn.innerText === 'SEMUA')) {
+                    btn.classList.add('filter-btn-active');
+                }
+            });
+            filterData();
+        }
+
+        function filterData() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const container = document.getElementById('list-container');
+
+            // LOGIKA SORTING: Belum Dijawab (Urutan Masuk Terlama) -> Dijawab
+            let sortedData = [...rawData].sort((a, b) => {
+                if (a.status !== 'Dijawab' && b.status === 'Dijawab') return -1;
+                if (a.status === 'Dijawab' && b.status !== 'Dijawab') return 1;
+                // Jika sama-sama belum dijawab, urutkan berdasarkan ID/Waktu (Terlama di atas)
+                if (a.status !== 'Dijawab' && b.status !== 'Dijawab') return a.id - b.id;
+                // Jika sudah dijawab, urutan terbaru di atas
+                return b.id - a.id;
+            });
+
+            // Filter Pencarian & Status
+            let filtered = sortedData.filter(item => {
+                const matchesSearch = item.nama.toLowerCase().includes(searchTerm) || item.jenis.toLowerCase().includes(searchTerm);
+                const matchesFilter = currentFilter === 'Semua' || item.status === currentFilter;
+                return matchesSearch && matchesFilter;
+            });
+
+            container.innerHTML = "";
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-20 text-slate-400 italic">Tidak ada laporan ditemukan.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const statusClass = item.status === 'Dijawab' ? 'bg-emerald-100 text-emerald-600' : (item.status === 'Dibaca' ? 'bg-amber-100 text-amber-600' : 'bg-rose-100 text-rose-600');
+                container.innerHTML += `
+                    <div onclick='openModal(${JSON.stringify(item)})' class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md active:scale-[0.98] transition-all cursor-pointer">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">${item.tgl}</span>
+                            <span class="text-[8px] font-black px-3 py-1 rounded-full uppercase ${statusClass}">${item.status}</span>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-800 leading-tight">${item.nama}</h4>
+                        <p class="text-[10px] font-bold text-blue-500 mt-1 uppercase tracking-widest">${item.jenis}</p>
+                    </div>`;
+            });
+        }
+
+        function openModal(item) {
+            fetch(URL_API, { method: 'POST', body: JSON.stringify({ action: 'markRead', id: item.id }) });
+            document.getElementById('modal-content').innerHTML = `
+                <div class="flex items-center gap-2 mb-2 text-blue-600 text-[10px] font-black uppercase tracking-widest">
+                    <i class="fas fa-paper-plane"></i> ${item.jenis}
+                </div>
+                <h3 class="text-2xl font-black text-slate-800">${item.nama}</h3>
+                <p class="text-xs text-slate-400 mb-4">${item.email}</p>
+                <div class="bg-slate-50 p-6 rounded-3xl text-xs italic text-slate-600 border border-slate-200 max-h-40 overflow-y-auto">
+                    "${item.pesan}"
+                </div>
+            `;
+            document.getElementById('btn-kirim').onclick = () => sendResponse(item);
+            const m = document.getElementById('modal');
+            const b = document.getElementById('modal-box');
+            m.classList.remove('hidden');
+            setTimeout(() => b.classList.remove('translate-y-full'), 10);
+        }
+
+        async function sendResponse(item) {
+            const val = document.getElementById('reply-box').value;
+            if (!val) return alert("Jawaban tidak boleh kosong!");
+            const btn = document.getElementById('btn-kirim');
+            btn.innerText = "Mengirim..."; btn.disabled = true;
+            try {
+                await fetch(URL_API, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'sendReply', id: item.id, email: item.email, nama: item.nama, jenis: item.jenis, jawaban: val })
+                });
+                alert("Terjawab! Email sudah dikirim ke pengadu.");
+                closeModal();
+                fetchList();
+            } catch (e) { alert("Gagal mengirim balasan."); btn.innerText = "Kirim Balasan"; btn.disabled = false; }
+        }
+
+        function closeModal() {
+            const b = document.getElementById('modal-box');
+            b.classList.add('translate-y-full');
+            setTimeout(() => document.getElementById('modal').classList.add('hidden'), 300);
+            document.getElementById('reply-box').value = "";
+        }
+
+        function refreshData() { fetchStats(); fetchList(); }
+        window.onload = fetchStats;
+    </script>
+</body>
+
+</html>
